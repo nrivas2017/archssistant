@@ -1,0 +1,120 @@
+{
+  "parameters": [
+    {
+      "name": "Escalabilidad",
+      "weight": 3,
+      "discretization": {
+        "Baja": "Carga de usuarios pequeña y predecible, crecimiento mínimo.",
+        "Media": "Crecimiento moderado, picos ocasionales.",
+        "Alta": "Gran volumen de usuarios concurrentes, datos masivos, crecimiento significativo."
+      }
+    },
+    {
+      "name": "Experiencia del Equipo",
+      "weight": 2,
+      "discretization": {
+        "Baja": "Poca o ninguna experiencia con la tecnología/patrones propuestos.",
+        "Media": "Experiencia básica o en tecnologías similares, requiere aprender detalles.",
+        "Alta": "Amplia experiencia y dominio de tecnologías y patrones relevantes."
+      }
+    },
+    {
+      "name": "Costo de Infraestructura",
+      "weight": 2,
+      "discretization": {
+        "Bajo": "Soluciones de bajo costo, infraestructura existente o servicios gratuitos/baratos.",
+        "Moderado": "Inversión razonable para optimizar rendimiento/disponibilidad.",
+        "Alto": "Inversión significativa para alto rendimiento, disponibilidad, resiliencia."
+      }
+    },
+    {
+      "name": "Latencia y Rendimiento",
+      "weight": 3,
+      "discretization": {
+        "Alta Tolerancia": "Tiempos de respuesta largos aceptados, no crítico en tiempo real.",
+        "Moderada": "Tiempos de respuesta razonables, no de misión crítica.",
+        "Baja Latencia Crítica": "Tiempos de respuesta extremadamente rápidos y predecibles."
+      }
+    },
+    {
+      "name": "Seguridad",
+      "weight": 2,
+      "discretization": {
+        "Básica": "Requisitos estándar, no maneja datos altamente sensibles.",
+        "Moderada": "Buen nivel de seguridad, autenticación, autorización, protección de datos.",
+        "Estricta": "Más alto nivel de seguridad, cumplimiento normativo, cifrado avanzado."
+      }
+    },
+    {
+      "name": "Mantenibilidad",
+      "weight": 3,
+      "discretization": {
+        "Baja": "Monolítico o alto acoplamiento, dificultad para cambios.",
+        "Media": "Cierto nivel de modularidad, cambios en componentes específicos.",
+        "Alta": "Modular, bajo acoplamiento, alta cohesión, evolución fácil."
+      }
+    }
+  ],
+  "architectures": [
+    {
+      "name": "Monolítica",
+      "recommendation": "Ideal para proyectos pequeños/prototipos, equipos reducidos, requisitos estables, no gran escalabilidad.",
+      "scores": {
+        "Escalabilidad": 1,
+        "Experiencia del Equipo": 3,
+        "Costo de Infraestructura": 3,
+        "Latencia y Rendimiento": 2,
+        "Seguridad": 2,
+        "Mantenibilidad": 1
+      }
+    },
+    {
+      "name": "Microservicios",
+      "recommendation": "Para sistemas complejos/grandes, alta escalabilidad, flexibilidad, equipos grandes. Facilita integración de modelos IA independientes.",
+      "scores": {
+        "Escalabilidad": 3,
+        "Experiencia del Equipo": 1,
+        "Costo de Infraestructura": 1,
+        "Latencia y Rendimiento": 3,
+        "Seguridad": 2,
+        "Mantenibilidad": 3
+      }
+    },
+    {
+      "name": "SOA",
+      "recommendation": "Grandes empresas con sistemas existentes, integración heterogénea, reutilización.",
+      "scores": {
+        "Escalabilidad": 2,
+        "Experiencia del Equipo": 2,
+        "Costo de Infraestructura": 2,
+        "Latencia y Rendimiento": 2,
+        "Seguridad": 3,
+        "Mantenibilidad": 2
+      }
+    },
+    {
+      "name": "Event-Driven Architecture (EDA)",
+      "recommendation": "Sistemas asíncronos, distribuidos, reactivos, alto volumen de datos, respuesta rápida. Muy adecuada para IA en tiempo real.",
+      "scores": {
+        "Escalabilidad": 3,
+        "Experiencia del Equipo": 1,
+        "Costo de Infraestructura": 1,
+        "Latencia y Rendimiento": 3,
+        "Seguridad": 2,
+        "Mantenibilidad": 3
+      }
+    },
+    {
+      "name": "Basada en Capas",
+      "recommendation": "Aplicaciones de negocio tradicionales, claridad, separación de preocupaciones, equipos con experiencia variada.",
+      "scores": {
+        "Escalabilidad": 1,
+        "Experiencia del Equipo": 3,
+        "Costo de Infraestructura": 2,
+        "Latencia y Rendimiento": 2,
+        "Seguridad": 2,
+        "Mantenibilidad": 2
+      }
+    }
+  ]
+}

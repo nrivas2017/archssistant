@@ -1,0 +1,70 @@
+stages:
+  - deploy
+
+variables:
+  REMOTE_USER: rivas
+  REMOTE_HOST: 200.13.4.194
+  REMOTE_DIR: /home/emi309/rivas/archssistant
+  REMOTE_PORT: 20170
+
+deploy_to_server:
+  stage: deploy
+  image: node:20.11.0-bookworm-slim
+  environment:
+    name: rivas #ponga el nombre de su rama
+  before_script:
+    - "which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )"
+    - apt-get update -y && apt-get install -y rsync procps lsof
+    - eval $(ssh-agent -s)
+    - echo "SERVER=$SERVER" > .env
+    - echo "PORT=$REMOTE_PORT" >> .env
+    - echo "AI_KEY_RIVAS=$AI_KEY_RIVAS" >> .env
+    - echo "AI_URL_RIVAS=$AI_URL_RIVAS" >> .env
+    - echo "$DEPLOY_PRIVATE_KEY_RIVAS" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - ssh-keyscan -H $REMOTE_HOST >> ~/.ssh/known_hosts
+
+  script:
+    - echo "Iniciando despliegue de ArchAssistant..."
+
+    - echo "Instalando dependencias del proyecto para compilación..."
+    - npm install
+
+    - echo "Compilando el código..."
+    - npm run build
+
+    - ssh -o StrictHostKeyChecking=no $REMOTE_USER@$REMOTE_HOST 'echo "Conexión SSH exitosa a ${REMOTE_HOST}!"'
+
+    - echo "Sincronizando archivos con el servidor remoto en $REMOTE_DIR..."
+    - ssh $REMOTE_USER@$REMOTE_HOST "mkdir -p $REMOTE_DIR"
+    - rsync -avz --delete dist/ $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/dist/
+    - rsync -avz --delete public/ $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/public/
+    - rsync -avz .env $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/.env
+    - rsync -avz package.json $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/package.json
+    - rsync -avz package-lock.json $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/package-lock.json
+    - rsync -avz decisionTable.json $REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/decisionTable.json
+
+    - echo "Deteniendo cualquier proceso de Node.js de ${REMOTE_USER} que escuche en el puerto $REMOTE_PORT..."
+    - |
+      ssh $REMOTE_USER@$REMOTE_HOST "
+        echo 'Cambiando al directorio del proyecto...'
+        cd $REMOTE_DIR || exit 1
+
+        echo 'Buscando procesos antiguos en el puerto $REMOTE_PORT...'
+        PID=\$(lsof -ti tcp:$REMOTE_PORT)
+        if [ -n \"\$PID\" ]; then
+          echo \"Proceso encontrado (PID: \$PID). Deteniéndolo...\"
+          kill -9 \$PID || echo 'No se pudo matar el proceso'
+          sleep 2
+        else
+          echo 'No se encontraron procesos anteriores'
+        fi
+
+        echo 'Instalando dependencias...'
+        npm install --production
+
+        echo 'Iniciando servidor...'
+        nohup node dist/server.js > out.log 2>&1 & disown
+      "
+
+    - echo "Despliegue de ArchAssistant finalizado con éxito. Revisa la IP ${REMOTE_HOST}:${REMOTE_PORT}"
